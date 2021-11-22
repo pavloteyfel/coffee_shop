@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import Column, String, Integer
 from flask_sqlalchemy import SQLAlchemy
+from flask import abort
 import json
 
 database_filename = "database.db"
@@ -64,7 +65,6 @@ class Drink(db.Model):
     '''
 
     def short(self):
-        print(json.loads(self.recipe))
         short_recipe = [{'color': r['color'], 'parts': r['parts']} for r in json.loads(self.recipe)]
         return {
             'id': self.id,
@@ -95,8 +95,15 @@ class Drink(db.Model):
     '''
 
     def insert(self):
-        db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception as error:
+            print(error)
+            db.session.rollback()
+            abort(422)
+        finally:
+            db.session.close()
 
     '''
     delete()
@@ -108,8 +115,15 @@ class Drink(db.Model):
     '''
 
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except Exception as error:
+            print(error)
+            db.session.rollback()
+            abort(422)
+        finally:
+            db.session.close()
 
     '''
     update()
@@ -122,7 +136,14 @@ class Drink(db.Model):
     '''
 
     def update(self):
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as error:
+            print(error)
+            db.session.rollback()
+            abort(422)
+        finally:
+            db.session.close()
 
     def __repr__(self):
         return json.dumps(self.short())
