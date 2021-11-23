@@ -1,21 +1,21 @@
+from src.database.models import Drink, db
 from flask_testing import TestCase
 from src.api import app
-from src.database.models import db_drop_and_create_all, setup_db, Drink, db
 
-import os
 import unittest
-import logging
+import pathlib
+import os
 
 # Turning off migration related logging INFO
 # logging.getLogger('alembic.runtime.migration').disabled = True
 # Mocking jwt_decode_handler:
 # https://stackoverflow.com/questions/55597216/authenticate-flask-unit-test-client-from-another-service-microservices-architec
-
+# python -m unittest -v
 
 class CoffeShopApiTestCase(TestCase):
 
     def create_app(self):
-        database_filename = 'src/database/test_database.db'
+        database_filename = pathlib.Path('src/database/test_database.db')
         project_dir = os.path.dirname(os.path.abspath(__file__))
         database_path = "sqlite:///{}".format(
             os.path.join(project_dir, database_filename))
