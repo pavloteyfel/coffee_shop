@@ -88,12 +88,15 @@ class Drink(db.Model):
         try:
             db.session.add(self)
             db.session.commit()
+            id = self.id
         except Exception as error:
             print(error)
             db.session.rollback()
             abort(422)
         finally:
             db.session.close()
+        
+        return id
 
     def delete(self):
         '''

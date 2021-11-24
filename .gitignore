@@ -14,3 +14,4 @@ ehthumbs.db
 Thumbs.db
 node_modules
 backend/src/database/database.db
+.idea

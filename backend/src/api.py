@@ -95,6 +95,7 @@ def get_drinks():
 
 
 @app.route('/drinks-detail')
+@requires_auth('get:drinks-detail')
 def get_drinks_detail():
     '''
     GET /drinks-detail
@@ -116,6 +117,7 @@ def get_drinks_detail():
 
 
 @app.route('/drinks', methods=['POST'])
+@requires_auth('post:drinks')
 @expects_json(create_drinks_schema)
 def create_drinks():
     '''
@@ -131,7 +133,7 @@ def create_drinks():
     drink = Drink.query.filter(
         Drink.title == payload.data.get('title')).first()
 
-    # 409
+    # 409 posted drink already exists
     # https://stackoverflow.com/questions/12658574/rest-api-design-post-to-create-with-duplicate-data-would-be-integrityerror-500
     if drink:
         abort(409)
@@ -141,11 +143,15 @@ def create_drinks():
         recipe=json.dumps(payload.data.get('recipe'))
     )
 
-    # Detach drink data from the session
+    # Save drink data
     drink_data = drink.long()
 
     # Throws 422 if there are problems during database transaction
-    drink.insert()
+    # Retrieve id of the new drink
+    drink_id = drink.insert()
+
+    # Propagate back the id
+    drink_data['id'] = drink_id
 
     return jsonify({
         'drinks': [drink_data]
@@ -153,6 +159,7 @@ def create_drinks():
 
 
 @app.route('/drinks/<int:id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
 @expects_json(update_drinks_schema)
 def update_drinks(id):
     '''
@@ -189,6 +196,7 @@ def update_drinks(id):
 
 
 @app.route('/drinks/<int:id>', methods=['DELETE'])
+@requires_auth('delete:drinks')
 def delete_drinks(id):
     '''
         DELETE /drinks/<id>
@@ -214,7 +222,6 @@ def delete_drinks(id):
 # Error handling
 # --------------------------------------------------------------------------- #
 
-
 @app.errorhandler(400)
 def bad_request(error):
     """
@@ -223,10 +230,20 @@ def bad_request(error):
     """
     if isinstance(error.description, ValidationError):
         original_error = error.description
-        return make_response(
-            jsonify(
-                {'error': 400, 'message': original_error.message}), 400)
+        return make_response(jsonify({
+            'error': 400, 'message': original_error.message
+            }), 400)
     return jsonify({'error': 400, 'message': 'bad request'}), 400
+
+
+@app.errorhandler(401)
+def unathorized(error):
+    return jsonify({'error': 401, 'message': 'unathorized'}), 401
+
+
+@app.errorhandler(403)
+def forbidden(error):
+    return jsonify({'error': 403, 'message': 'forbidden'}), 403
 
 
 @app.errorhandler(404)
@@ -249,10 +266,14 @@ def unprocessable_entity(error):
     return jsonify({'error': 422, 'message': 'unprocessable entity'}), 422
 
 
-'''
-@TODO implement error handler for AuthError
-    error handler should conform to general task above
-'''
+@app.errorhandler(AuthError)
+def auth_error(error):
+    status_code = error.status_code
+    description = error.error.get('description')
+    return jsonify({
+        'error': status_code, 'message': description
+    }), status_code
+
 
 if __name__ == "__main__":
     app.debug = True
