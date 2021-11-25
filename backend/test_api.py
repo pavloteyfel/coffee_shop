@@ -20,6 +20,7 @@ def mock_requires_auth(permission):
         return wrapper
     return requires_auth_decorator
 
+
 # Replace the real authentication decorator with mock function
 patch('src.auth.auth.requires_auth', mock_requires_auth).start()
 
@@ -49,7 +50,7 @@ class TestAuthModule(unittest.TestCase):
             auth.get_token_auth_header(request)
         self.assertTrue(context.exception.status_code, 401)
         self.assertTrue(context.exception.error.get('code'), 'no_auth_header')
-    
+
     def test_check_permissions(self):
         payload = {'permissions': ['get:drinks']}
         self.assertTrue(auth.check_permissions('get:drinks', payload))
@@ -102,7 +103,7 @@ class TestCoffeShopApp(TestCase):
 
     def test_post_drinks(self):
         body = {'title': 'Post Drink',
-         'recipe': [{'name': 'water', 'color': 'blue', 'parts': 1}]}
+                'recipe': [{'name': 'water', 'color': 'blue', 'parts': 1}]}
         response = self.client.post('/drinks', json=body)
         self.assertEqual(response.status_code, 200)
         drink = Drink.query.filter(Drink.title == 'Post Drink').first()
@@ -110,7 +111,7 @@ class TestCoffeShopApp(TestCase):
 
     def test_post_drinks_error_409(self):
         body = {'title': 'Post Drink',
-         'recipe': [{'name': 'water', 'color': 'blue', 'parts': 1}]}
+                'recipe': [{'name': 'water', 'color': 'blue', 'parts': 1}]}
         response_1 = self.client.post('/drinks', json=body)
         self.assertEqual(response_1.status_code, 200)
         response_2 = self.client.post('/drinks', json=body)
@@ -118,7 +119,7 @@ class TestCoffeShopApp(TestCase):
 
     def test_post_drinks_error_400(self):
         body = {'title': 'Post Drink',
-         'recipe': [{'name': 'water', 'color': 'blue'}]}
+                'recipe': [{'name': 'water', 'color': 'blue'}]}
         response = self.client.post('/drinks', json=body)
         self.assertEqual(response.status_code, 400)
 

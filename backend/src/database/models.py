@@ -2,8 +2,8 @@ from sqlalchemy import Column, String, Integer
 from flask_sqlalchemy import SQLAlchemy
 from flask import abort
 
-import os
 import json
+import os
 
 database_filename = 'database.db'
 project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,21 +14,21 @@ db = SQLAlchemy()
 
 
 def setup_db(app):
-    '''
+    """
     setup_db(app)
         binds a flask application and a SQLAlchemy service
-    '''
+    """
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
 
 def db_drop_and_create_all():
-    '''
+    """
     db_drop_and_create_all()
         drops the database tables and starts fresh
         can be used to initialize a clean database
-    '''
+    """
     db.drop_all()
     db.create_all()
     drinks = [
@@ -39,10 +39,10 @@ def db_drop_and_create_all():
 
 
 class Drink(db.Model):
-    '''
+    """
     Drink
     a persistent drink entity, extends the base SQLAlchemy Model
-    '''
+    """
     id = Column(Integer().with_variant(Integer, "sqlite"), primary_key=True)
     title = Column(String(80), unique=True)
     # the ingredients blob - this stores a lazy json blob
@@ -51,10 +51,10 @@ class Drink(db.Model):
     recipe = Column(String(180), nullable=False)
 
     def short(self):
-        '''
+        """
         short()
             short form representation of the Drink model
-        '''
+        """
         short_recipe = [{'color': r['color'], 'parts': r['parts']}
                         for r in json.loads(self.recipe)]
         return {
@@ -64,10 +64,10 @@ class Drink(db.Model):
         }
 
     def long(self):
-        '''
+        """
         long()
             long form representation of the Drink model
-        '''
+        """
         return {
             'id': self.id,
             'title': self.title,
@@ -76,7 +76,7 @@ class Drink(db.Model):
 
 
     def insert(self):
-        '''
+        """
         insert()
             inserts a new model into a database
             the model must have a unique name
@@ -84,7 +84,7 @@ class Drink(db.Model):
             EXAMPLE
                 drink = Drink(title=req_title, recipe=req_recipe)
                 drink.insert()
-        '''
+        """
         try:
             db.session.add(self)
             db.session.commit()
@@ -99,14 +99,14 @@ class Drink(db.Model):
         return id
 
     def delete(self):
-        '''
+        """
         delete()
             deletes a new model into a database
             the model must exist in the database
             EXAMPLE
                 drink = Drink(title=req_title, recipe=req_recipe)
                 drink.delete()
-        '''
+        """
         try:
             db.session.delete(self)
             db.session.commit()
@@ -119,7 +119,7 @@ class Drink(db.Model):
 
 
     def update(self):
-        '''
+        """
         update()
             updates a new model into a database
             the model must exist in the database
@@ -127,7 +127,7 @@ class Drink(db.Model):
                 drink = Drink.query.filter(Drink.id == id).one_or_none()
                 drink.title = 'Black Coffee'
                 drink.update()
-        '''
+        """
         try:
             db.session.commit()
         except Exception as error:
