@@ -167,17 +167,17 @@ The API will return three error types when requests fail:
 **Example request:**
 ```json
 {
-    title: "Manager Coffee",
-    recipe: [
+    "title": "Manager Coffee",
+    "recipe": [
         {
-            name: "Milk",
-            color: "white",
-            parts: 1
+            "name": "Milk",
+            "color": "white",
+            "parts": 1
         },
         {
-            name: "Coffee",
-            color: "brown",
-            parts: 2
+            "name": "Coffee",
+            "color": "brown",
+            "parts": 2
         }
     ]
 }
