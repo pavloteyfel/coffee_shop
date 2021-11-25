@@ -132,7 +132,7 @@ The API will return three error types when requests fail:
 - Fetches all drinks from the database and returns them in an array with extended details
 
 **Example response:**
-```shell
+```json
 {
     "drinks": [
         {
@@ -165,7 +165,7 @@ The API will return three error types when requests fail:
 - Inserts drink data based on the information provided
 
 **Example request:**
-```shell
+```json
 {
     title: "Manager Coffee",
     recipe: [
@@ -183,7 +183,7 @@ The API will return three error types when requests fail:
 }
 ```
 **Example response:**
-```shell
+```json
 {
     "drinks": [
         {
@@ -210,7 +210,7 @@ The API will return three error types when requests fail:
 **Permission:** `delete:drinks`
 - Removes all drink information of the given drink <id>
 **Example response:**
-```shell
+```json
 {
     "delete": 1
 }
@@ -220,13 +220,13 @@ The API will return three error types when requests fail:
 - Updates drink data and saves the changes into database
 
 **Example body request:**
-```shell
+```json
 {
   "title": "Flat white"
 }
 ```
 **Example response:**
-```shell
+```json
 {
     "drinks": [
         {
