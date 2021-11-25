@@ -16,22 +16,23 @@ API_AUDIENCE = 'coffeeshop'
 # Helpers
 # --------------------------------------------------------------------------- #
 
+
 def timed_cache(**timedelta_kwargs):
-    """Timed cache decorator, uses timedelta class for expiration"""                                                                                                              
-    def _wrapper(f):                                                              
-        update_delta = timedelta(**timedelta_kwargs)                              
-        next_update = datetime.utcnow() + update_delta                            
-        f = lru_cache(None)(f)                                          
-                                                                                                                      
-        @functools.wraps(f)                                                       
-        def _wrapped(*args, **kwargs):                                            
-            nonlocal next_update                                                  
-            now = datetime.utcnow()                                               
-            if now >= next_update:                                                
-                f.cache_clear()                                                   
-                next_update = now + update_delta                                
-            return f(*args, **kwargs)                                             
-        return _wrapped                                                           
+    """Timed cache decorator, uses timedelta class for expiration"""
+    def _wrapper(f):
+        update_delta = timedelta(**timedelta_kwargs)
+        next_update = datetime.utcnow() + update_delta
+        f = lru_cache(None)(f)
+
+        @functools.wraps(f)
+        def _wrapped(*args, **kwargs):
+            nonlocal next_update
+            now = datetime.utcnow()
+            if now >= next_update:
+                f.cache_clear()
+                next_update = now + update_delta
+            return f(*args, **kwargs)
+        return _wrapped
     return _wrapper
 
 
@@ -41,6 +42,7 @@ def timed_cache(**timedelta_kwargs):
 
 class AuthError(Exception):
     """A standardized way to communicate auth failure modes"""
+
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
@@ -49,14 +51,15 @@ class AuthError(Exception):
 # Authentication helper functions
 # --------------------------------------------------------------------------- #
 
+
 def get_token_auth_header(headers):
     """
     Attempts to get the header from the (Flask) request
         - raises an AuthError if no header is present
-    
+
     Attempts to split bearer and the token
         - raises an AuthError if the header is malformed
-    
+
     Returns:
         - the token part of the header
     """
@@ -68,7 +71,7 @@ def get_token_auth_header(headers):
 
     try:
         bearer, token = headers.get('Authorization').split(' ')
-    except:
+    except BaseException:
         raise AuthError({
             'code': 'invalid_auth_header',
             'description': 'Invalid authorization header.'
@@ -79,7 +82,7 @@ def get_token_auth_header(headers):
             'code': 'invalid_auth_header',
             'description': 'Invalid authorization header.'
         }, 400)
-        
+
     return token
 
 
@@ -116,11 +119,12 @@ def decode_token(token, key):
             'description': 'Incorrect claims. Please, check the audience and issuer.'
         }, 401)
 
-    except:
+    except BaseException:
         raise AuthError({
             'code': 'invalid_header',
             'description': 'Unable to parse authentication token.'
         }, 400)
+
 
 def check_permissions(permission, payload):
     '''
@@ -129,7 +133,7 @@ def check_permissions(permission, payload):
             - payload: decoded jwt payload
 
         - Raises an AuthError if permissions are not included in the payload
-        - Raises an AuthError if the requested permission string is not in 
+        - Raises an AuthError if the requested permission string is not in
         the payload permissions array
 
         Returns:
@@ -140,14 +144,15 @@ def check_permissions(permission, payload):
             'code': 'invalid_claims',
             'description': 'Permissions not included in JWT.'
         }, 400)
-    
+
     if permission not in payload.get('permissions'):
         raise AuthError({
             'code': 'unauthorized',
             'description': 'Permission not found.'
         }, 403)
-    
+
     return True
+
 
 @timed_cache(days=1)
 def get_jwks(url):
@@ -161,6 +166,7 @@ def get_jwks(url):
         - dictionary with jw keys
     '''
     return requests.get(url).json()
+
 
 def verify_jwt(token):
     '''
@@ -199,10 +205,12 @@ def verify_jwt(token):
         }, 400)
 
     return rsa_key
-    
+
 # --------------------------------------------------------------------------- #
 # Authentication wrapper function
 # --------------------------------------------------------------------------- #
+
+
 def requires_auth(permission=''):
     '''
     Arguments:
@@ -210,9 +218,9 @@ def requires_auth(permission=''):
 
     - Uses the get_token_auth_header method to get the token
     - Uses the verify_decode_jwt method to decode the jwt
-    - Uses the check_permissions method validate claims and check the 
+    - Uses the check_permissions method validate claims and check the
         requested permission
-    
+
     Returns:
         - the decorator which passes the decoded payload to the decorated method
     '''

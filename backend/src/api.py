@@ -81,7 +81,7 @@ update_drinks_schema = {
 def get_drinks():
     '''
     A public endpoint, contains only the drink.short() data representation.
-    
+
     Returns:
         - status code 200 and json {"drinks": drinks} where drinks is the
     list of drinks or appropriate status code indicating reason for failure.
@@ -105,9 +105,9 @@ def get_drinks_detail():
 
     - Requires the 'get:drinks-detail' permission
     - Contains the drink.long() data representation
-    
+
     Returns:
-        - status code 200 and json {"drinks": drinks} where drinks is the 
+        - status code 200 and json {"drinks": drinks} where drinks is the
     list of drinks or appropriate status code indicating reason for failure
     '''
     drinks = Drink.query.all()
@@ -128,10 +128,10 @@ def create_drinks():
     '''
     - Creates a new row in the drinks table
     - Requires the 'post:drinks' permission
-    
+
     Returns:
         - status code 200 and json {"drinks": drink}, where drink an array
-    containing only the newly created drink or appropriate status code 
+    containing only the newly created drink or appropriate status code
     indicating reason for failure
     '''
 
@@ -170,12 +170,12 @@ def update_drinks(id):
     '''
     Arguments:
         - <id> is the existing model id
-            
+
     - Responds with a 404 error if <id> is not found
     - Updates the corresponding row for <id>
     - Requires the 'patch:drinks' permission
     - Contains the drink.long() data representation
-    
+
     Returns:
         - status code 200 and json {"drinks": drink} where drink an array
     containing only the updated drink or appropriate status code indicating
@@ -207,14 +207,15 @@ def update_drinks(id):
 @requires_auth('delete:drinks')
 def delete_drinks(id):
     '''
-    Arguments:        
+    Arguments:
         - <id>: is the existing model id
-    
+
     - Responds with a 404 error if <id> is not found
     - Deletes the corresponding row for <id>
     - Requires the 'delete:drinks' permission
-    - Returns status code 200 and json {"delete": id} where id is the id of 
-    the deleted record or appropriate status code indicating reason for failure
+    - Returns status code 200 and json {"delete": id} where id is the id of
+    the deleted record or appropriate status code indicating reason for 
+    failure
     '''
     # 404 if no entry found
     drink = Drink.query.get_or_404(id)
@@ -223,12 +224,13 @@ def delete_drinks(id):
     drink.delete()
 
     return jsonify({
-        'detele': id
+        'delete': id
     }), 200
 
 # --------------------------------------------------------------------------- #
 # Error handling
 # --------------------------------------------------------------------------- #
+
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -240,8 +242,9 @@ def bad_request(error):
         original_error = error.description
         return make_response(jsonify({
             'error': 400, 'message': original_error.message
-            }), 400)
+        }), 400)
     return jsonify({'error': 400, 'message': 'bad request'}), 400
+
 
 @app.errorhandler(AuthError)
 def auth_error(error):
@@ -251,6 +254,7 @@ def auth_error(error):
     return jsonify({
         'error': status_code, 'message': description
     }), status_code
+
 
 @app.errorhandler(401)
 def unathorized(error):
