@@ -88,10 +88,6 @@ def get_drinks():
     '''
     drinks = Drink.query.all()
 
-    # 404 if there are no drinks entries
-    if not drinks:
-        abort(404)
-
     return jsonify({
         'drinks': [drink.short() for drink in drinks],
     }), 200
