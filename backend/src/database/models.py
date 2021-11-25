@@ -1,7 +1,8 @@
-import os
 from sqlalchemy import Column, String, Integer
 from flask_sqlalchemy import SQLAlchemy
 from flask import abort
+
+import os
 import json
 
 database_filename = 'database.db'
@@ -35,7 +36,6 @@ def db_drop_and_create_all():
          'recipe': '[{"name": "water", "color": "blue", "parts": 1}]'}]
     for drink in drinks:
         Drink(**drink).insert()
-
 
 
 class Drink(db.Model):

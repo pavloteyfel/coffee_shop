@@ -1,13 +1,10 @@
-from flask import request, abort, _request_ctx_stack
 from datetime import datetime, timedelta
-from urllib.request import urlopen
 from functools import wraps, lru_cache
+from flask import request
 from jose import jwt
 
 import functools
 import requests
-import json
-
 
 
 AUTH0_DOMAIN = 'https://dev-start-location.eu.auth0.com/'
@@ -20,7 +17,7 @@ API_AUDIENCE = 'coffeeshop'
 # --------------------------------------------------------------------------- #
 
 def timed_cache(**timedelta_kwargs):
-    """Timed cache decorator, based on timedelta class"""                                                                                                              
+    """Timed cache decorator, uses timedelta class for expiration"""                                                                                                              
     def _wrapper(f):                                                              
         update_delta = timedelta(**timedelta_kwargs)                              
         next_update = datetime.utcnow() + update_delta                            
@@ -38,19 +35,22 @@ def timed_cache(**timedelta_kwargs):
     return _wrapper
 
 
-## AuthError Exception
+# --------------------------------------------------------------------------- #
+# Custom error classes
+# --------------------------------------------------------------------------- #
+
 class AuthError(Exception):
-    '''
-    AuthError Exception
-    A standardized way to communicate auth failure modes
-    '''
+    """A standardized way to communicate auth failure modes"""
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
 
+# --------------------------------------------------------------------------- #
+# Authentication helper functions
+# --------------------------------------------------------------------------- #
 
 def get_token_auth_header(headers):
-    '''
+    """
     Attempts to get the header from the (Flask) request
         - raises an AuthError if no header is present
     
@@ -59,7 +59,7 @@ def get_token_auth_header(headers):
     
     Returns:
         - the token part of the header
-    '''
+    """
     if not headers.get('Authorization'):
         raise AuthError({
             'code': 'no_auth_header',
@@ -84,6 +84,16 @@ def get_token_auth_header(headers):
 
 
 def decode_token(token, key):
+    """
+    Decodes the payload from the token, validates the claims
+
+    Arguments:
+        - token: jwt token
+        - key: rsa key
+
+    Returns
+        - payload: the decoded payload
+    """
     try:
         payload = jwt.decode(
             token=token,
@@ -118,8 +128,8 @@ def check_permissions(permission, payload):
             - permission: string permission (i.e. 'post:drink')
             - payload: decoded jwt payload
 
-        it raises an AuthError if permissions are not included in the payload
-        it raises an AuthError if the requested permission string is not in 
+        - Raises an AuthError if permissions are not included in the payload
+        - Raises an AuthError if the requested permission string is not in 
         the payload permissions array
 
         Returns:
@@ -157,13 +167,11 @@ def verify_jwt(token):
     Arguments:
         - token: a json web token (string)
 
-    it should be an Auth0 token with key id (kid)
-    verifies the token using Auth0 /.well-known/jwks.json
-    decodes the payload from the token
-    validates the claims
+    - It should be an Auth0 token with key id (kid)
+    - Verifies the token using Auth0 /.well-known/jwks.json
 
-    Returns
-        - the decoded payload
+    Returns:
+        - rsa_key: key for decoding jwt
     '''
     rsa_key = {}
     jw_keys = get_jwks(AUTH0_WELL_KNOWN)
@@ -192,15 +200,17 @@ def verify_jwt(token):
 
     return rsa_key
     
-
+# --------------------------------------------------------------------------- #
+# Authentication wrapper function
+# --------------------------------------------------------------------------- #
 def requires_auth(permission=''):
     '''
     Arguments:
         - permission: string permission (i.e. 'post:drink')
 
-    Uses the get_token_auth_header method to get the token
-    Uses the verify_decode_jwt method to decode the jwt
-    Uses the check_permissions method validate claims and check the 
+    - Uses the get_token_auth_header method to get the token
+    - Uses the verify_decode_jwt method to decode the jwt
+    - Uses the check_permissions method validate claims and check the 
         requested permission
     
     Returns:
@@ -212,7 +222,6 @@ def requires_auth(permission=''):
             token = get_token_auth_header(request.headers)
             key = verify_jwt(token)
             payload = decode_token(token, key)
-            print(payload)
             check_permissions(permission, payload)
             return func(*args, **kwargs)
         return wrapper
