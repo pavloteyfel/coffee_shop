@@ -75,7 +75,7 @@ npm install
 ```
 
 ## Tests
-You can use the following command to run all test cases from the `backend` folder:
+You can use the following command to run all test cases (test_api.py) from the `backend` folder:
 ```shell
 python3 -m unittest -v
 ```
