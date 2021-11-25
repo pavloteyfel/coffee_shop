@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, abort, g as payload, make_response
-from .auth.auth import AuthError, requires_auth
 from .database.models import setup_db, Drink, db_drop_and_create_all
+from .auth.auth import AuthError, requires_auth
 from flask_expects_json import expects_json
 from jsonschema import ValidationError
 from flask_cors import CORS
