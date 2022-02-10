@@ -23,6 +23,7 @@ def setup_db(app):
     db.app = app
     db.init_app(app)
 
+
 def db_drop_and_create_all():
     """
     db_drop_and_create_all()
@@ -74,7 +75,6 @@ class Drink(db.Model):
             'recipe': json.loads(self.recipe)
         }
 
-
     def insert(self):
         """
         insert()
@@ -95,7 +95,7 @@ class Drink(db.Model):
             abort(422)
         finally:
             db.session.close()
-        
+
         return id
 
     def delete(self):
@@ -116,7 +116,6 @@ class Drink(db.Model):
             abort(422)
         finally:
             db.session.close()
-
 
     def update(self):
         """
